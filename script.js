@@ -7,7 +7,7 @@ s.src = "s.png";
 var l = new Image();
 s.src = "l.png";
 ctx.fillStyle = "#FF0000";
-//test jenkins
+//test jenkins1
 // ctx.fillRect(0,0, 100, 100);
 // ctx.fillText("Hello", 10,10);
 setInterval(refresh,1000);
