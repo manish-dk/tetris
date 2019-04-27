@@ -3,19 +3,20 @@ var ctx = canvas.getContext("2d");
 var p = 20;
 var x = 0.5 + 12 * p;
 var y = 0.5;
-var floor = 0.5 + 30*p;
+var floor = 0.5 + 30 * p;
 canvas.height = 800;
 canvas.width = 600;
 
 //tetrominos
-var line = { colour: "red", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x, y - 3 * p]] };
+var line = {colour: "red", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x, y - 3 * p]] };
 var square = { colour: "yellow", blocks: [[x, y], [x, y - p], [x - p, y], [x - p, y - p]] };
-var t = { colour: "aqua", blocks: [[x, y], [x, y - p], [x - p, y - p], [x + p, y - p]] };
+var t = {colour: "aqua", blocks: [[x, y], [x, y - p], [x - p, y - p], [x + p, y - p]] };
 var s = { colour: "aquamarine", blocks: [[x, y], [x, y - p], [x - p, y], [x + p, y - p]] };
 var z = { colour: "greenyellow", blocks: [[x, y], [x, y - p], [x + p, y], [x - p, y - p]] };
 var l = { colour: "pink", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x + p, y]] };
 var j = { colour: "orange", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x - p, y]] };
 
+var tetroState = 1;
 var tetrominos = [line, square, t, s, z, l, j];
 var current = JSON.parse(JSON.stringify(tetrominos[Math.floor(Math.random() * tetrominos.length)]));
 
@@ -55,15 +56,19 @@ function drawboard() {
 
 
 window.onkeydown = function (event) {
+    if (event.keyCode == 38) {
+        rotate(current);
+        refresh();
+    }
     if (event.keyCode == 37) {
-        if(!checkLeft()) return;
+        if (!checkMove(-1)) return;
         for (let i = 0; i < current.blocks.length; i++) {
             current.blocks[i][0] -= p;
         }
         refresh();
     }
     if (event.keyCode == 39) {
-        if(!checkRight()) return;
+        if (!checkMove(1)) return;
         for (let i = 0; i < current.blocks.length; i++) {
             current.blocks[i][0] += p;
         }
@@ -75,6 +80,16 @@ window.onkeydown = function (event) {
         }
         refresh();
     }
+}
+
+function rotate(tetromino) {
+    if(tetroState==1 && tetromino.colour=="red") {
+        tetromino.blocks[0]=[tetromino.blocks[0][0]-p,tetromino.blocks[0][1]-p];
+        tetromino.blocks[2]=[tetromino.blocks[2][0]+p,tetromino.blocks[2][1]+p];
+        tetromino.blocks[3]=[tetromino.blocks[3][0]+2*p,tetromino.blocks[3][1]+2*p];
+        tetroState=2;
+    }
+    
 }
 
 function downtick() {
@@ -93,17 +108,18 @@ function drawCurrent() {
 
 function storetetromino(tetromino) {
     past.push(tetromino);
+    tetroState=1;
     current = JSON.parse(JSON.stringify(tetrominos[Math.floor(Math.random() * tetrominos.length)]));
 }
 
 function checkCollision() {
-    
+
     for (let i = 0; i < past.length; i++) {
         for (let j = 0; j < past[i].blocks.length; j++) {
-            if (past[i].blocks[j][0] == current.blocks[0][0] && past[i].blocks[j][1] == current.blocks[0][1] + p 
-                || past[i].blocks[j][0] == current.blocks[1][0] && past[i].blocks[j][1] == current.blocks[1][1]+ p 
-                || past[i].blocks[j][0] == current.blocks[2][0] && past[i].blocks[j][1] == current.blocks[2][1]+ p 
-                || past[i].blocks[j][0] == current.blocks[3][0] && past[i].blocks[j][1] == current.blocks[3][1]+ p) {
+            if (past[i].blocks[j][0] == current.blocks[0][0] && past[i].blocks[j][1] == current.blocks[0][1] + p
+                || past[i].blocks[j][0] == current.blocks[1][0] && past[i].blocks[j][1] == current.blocks[1][1] + p
+                || past[i].blocks[j][0] == current.blocks[2][0] && past[i].blocks[j][1] == current.blocks[2][1] + p
+                || past[i].blocks[j][0] == current.blocks[3][0] && past[i].blocks[j][1] == current.blocks[3][1] + p) {
                 storetetromino(current);
             }
         }
@@ -115,13 +131,13 @@ function checkCollision() {
     }
 }
 
-function checkRight() {
+function checkMove(x) {
     for (let i = 0; i < past.length; i++) {
         for (let j = 0; j < past[i].blocks.length; j++) {
-            if (past[i].blocks[j][0] == current.blocks[0][0] +p && past[i].blocks[j][1] == current.blocks[0][1]  
-                || past[i].blocks[j][0] == current.blocks[1][0]+p && past[i].blocks[j][1] == current.blocks[1][1] 
-                || past[i].blocks[j][0] == current.blocks[2][0]+p && past[i].blocks[j][1] == current.blocks[2][1] 
-                || past[i].blocks[j][0] == current.blocks[3][0]+p && past[i].blocks[j][1] == current.blocks[3][1]) {
+            if (past[i].blocks[j][0] == current.blocks[0][0] + x*p && past[i].blocks[j][1] == current.blocks[0][1]
+                || past[i].blocks[j][0] == current.blocks[1][0] + x*p && past[i].blocks[j][1] == current.blocks[1][1]
+                || past[i].blocks[j][0] == current.blocks[2][0] + x*p && past[i].blocks[j][1] == current.blocks[2][1]
+                || past[i].blocks[j][0] == current.blocks[3][0] + x*p && past[i].blocks[j][1] == current.blocks[3][1]) {
                 return false;
             }
         }
@@ -129,19 +145,6 @@ function checkRight() {
     return true;
 }
 
-function checkLeft() {
-    for (let i = 0; i < past.length; i++) {
-        for (let j = 0; j < past[i].blocks.length; j++) {
-            if (past[i].blocks[j][0] == current.blocks[0][0] -p && past[i].blocks[j][1] == current.blocks[0][1]  
-                || past[i].blocks[j][0] == current.blocks[1][0]-p && past[i].blocks[j][1] == current.blocks[1][1] 
-                || past[i].blocks[j][0] == current.blocks[2][0]-p && past[i].blocks[j][1] == current.blocks[2][1] 
-                || past[i].blocks[j][0] == current.blocks[3][0]-p && past[i].blocks[j][1] == current.blocks[3][1]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
 
 function drawPast() {
     past.forEach(function (tetromino) {
