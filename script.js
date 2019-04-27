@@ -3,7 +3,7 @@ var ctx = canvas.getContext("2d");
 var p = 20;
 var x = 0.5 + 12 * p;
 var y = 0.5;
-var floor = 600;
+var floor = 0.5 + 30*p;
 canvas.height = 800;
 canvas.width = 600;
 
@@ -56,12 +56,14 @@ function drawboard() {
 
 window.onkeydown = function (event) {
     if (event.keyCode == 37) {
+        if(!checkLeft()) return;
         for (let i = 0; i < current.blocks.length; i++) {
             current.blocks[i][0] -= p;
         }
         refresh();
     }
     if (event.keyCode == 39) {
+        if(!checkRight()) return;
         for (let i = 0; i < current.blocks.length; i++) {
             current.blocks[i][0] += p;
         }
@@ -95,18 +97,50 @@ function storetetromino(tetromino) {
 }
 
 function checkCollision() {
+    
+    for (let i = 0; i < past.length; i++) {
+        for (let j = 0; j < past[i].blocks.length; j++) {
+            if (past[i].blocks[j][0] == current.blocks[0][0] && past[i].blocks[j][1] == current.blocks[0][1] + p 
+                || past[i].blocks[j][0] == current.blocks[1][0] && past[i].blocks[j][1] == current.blocks[1][1]+ p 
+                || past[i].blocks[j][0] == current.blocks[2][0] && past[i].blocks[j][1] == current.blocks[2][1]+ p 
+                || past[i].blocks[j][0] == current.blocks[3][0] && past[i].blocks[j][1] == current.blocks[3][1]+ p) {
+                storetetromino(current);
+            }
+        }
+    }
     for (let i = 0; i < current.blocks.length; i++) {
         if (current.blocks[i][1] == floor) {
             storetetromino(current);
         }
     }
+}
+
+function checkRight() {
     for (let i = 0; i < past.length; i++) {
         for (let j = 0; j < past[i].blocks.length; j++) {
-            if (past[i].blocks[j].toString() == current.blocks[0].toString() || past[i].blocks[j].toString() == current.blocks[1].toString() || past[i].blocks[j].toString() == current.blocks[2].toString() || past[i].blocks[j].toString() == current.blocks[3].toString()) {
-                storetetromino(current);
+            if (past[i].blocks[j][0] == current.blocks[0][0] +p && past[i].blocks[j][1] == current.blocks[0][1]  
+                || past[i].blocks[j][0] == current.blocks[1][0]+p && past[i].blocks[j][1] == current.blocks[1][1] 
+                || past[i].blocks[j][0] == current.blocks[2][0]+p && past[i].blocks[j][1] == current.blocks[2][1] 
+                || past[i].blocks[j][0] == current.blocks[3][0]+p && past[i].blocks[j][1] == current.blocks[3][1]) {
+                return false;
             }
         }
     }
+    return true;
+}
+
+function checkLeft() {
+    for (let i = 0; i < past.length; i++) {
+        for (let j = 0; j < past[i].blocks.length; j++) {
+            if (past[i].blocks[j][0] == current.blocks[0][0] -p && past[i].blocks[j][1] == current.blocks[0][1]  
+                || past[i].blocks[j][0] == current.blocks[1][0]-p && past[i].blocks[j][1] == current.blocks[1][1] 
+                || past[i].blocks[j][0] == current.blocks[2][0]-p && past[i].blocks[j][1] == current.blocks[2][1] 
+                || past[i].blocks[j][0] == current.blocks[3][0]-p && past[i].blocks[j][1] == current.blocks[3][1]) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 function drawPast() {
