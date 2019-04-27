@@ -8,16 +8,17 @@ canvas.height = 800;
 canvas.width = 600;
 
 //tetrominos
-var line = {colour: "red", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x, y - 3 * p]] };
+var line = {state: 1, colour: "red", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x, y - 3 * p]] };
 var square = { colour: "yellow", blocks: [[x, y], [x, y - p], [x - p, y], [x - p, y - p]] };
-var t = {colour: "aqua", blocks: [[x, y], [x, y - p], [x - p, y - p], [x + p, y - p]] };
-var s = { colour: "aquamarine", blocks: [[x, y], [x, y - p], [x - p, y], [x + p, y - p]] };
-var z = { colour: "greenyellow", blocks: [[x, y], [x, y - p], [x + p, y], [x - p, y - p]] };
-var l = { colour: "pink", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x + p, y]] };
-var j = { colour: "orange", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x - p, y]] };
+var t = {state: 1,colour: "aqua", blocks: [[x, y], [x, y - p], [x - p, y - p], [x + p, y - p]] };
+var s = {state: 1, colour: "aquamarine", blocks: [[x, y], [x, y - p], [x - p, y], [x + p, y - p]] };
+var z = {state: 1, colour: "greenyellow", blocks: [[x, y], [x, y - p], [x + p, y], [x - p, y - p]] };
+var l = { state: 1,colour: "pink", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x + p, y]] };
+var j = { state: 1,colour: "orange", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x - p, y]] };
 
 var tetroState = 1;
 var tetrominos = [line, square, t, s, z, l, j];
+// var tetrominos = [j];
 var current = JSON.parse(JSON.stringify(tetrominos[Math.floor(Math.random() * tetrominos.length)]));
 
 var past = [];
@@ -57,8 +58,9 @@ function drawboard() {
 
 window.onkeydown = function (event) {
     if (event.keyCode == 38) {
-        rotate(current);
+        rotate();
         refresh();
+        
     }
     if (event.keyCode == 37) {
         if (!checkMove(-1)) return;
@@ -82,15 +84,6 @@ window.onkeydown = function (event) {
     }
 }
 
-function rotate(tetromino) {
-    if(tetroState==1 && tetromino.colour=="red") {
-        tetromino.blocks[0]=[tetromino.blocks[0][0]-p,tetromino.blocks[0][1]-p];
-        tetromino.blocks[2]=[tetromino.blocks[2][0]+p,tetromino.blocks[2][1]+p];
-        tetromino.blocks[3]=[tetromino.blocks[3][0]+2*p,tetromino.blocks[3][1]+2*p];
-        tetroState=2;
-    }
-    
-}
 
 function downtick() {
     for (let i = 0; i < current.blocks.length; i++) {
@@ -120,7 +113,7 @@ function checkCollision() {
                 || past[i].blocks[j][0] == current.blocks[1][0] && past[i].blocks[j][1] == current.blocks[1][1] + p
                 || past[i].blocks[j][0] == current.blocks[2][0] && past[i].blocks[j][1] == current.blocks[2][1] + p
                 || past[i].blocks[j][0] == current.blocks[3][0] && past[i].blocks[j][1] == current.blocks[3][1] + p) {
-                storetetromino(current);
+                    storetetromino(current);
             }
         }
     }
@@ -153,4 +146,137 @@ function drawPast() {
             ctx.fillRect(tetromino.blocks[i][0], tetromino.blocks[i][1], p, p);
         }
     });
+}
+
+function rotate() {
+    if(current.colour=="red") {
+        if(current.state == 1) {
+            current.blocks[0][0]-=p; 
+            current.blocks[0][1]-=p;
+            current.blocks[2][0]+=p;
+            current.blocks[2][1]+=p;
+            current.blocks[3][0]+=2*p;
+            current.blocks[3][1]+=2*p;
+            current.state=2;
+        }
+        else if(current.state == 2) {
+            current.blocks[0][0]+=p;
+            current.blocks[0][1]+=p;
+            current.blocks[2][0]-=p;
+            current.blocks[2][1]-=p;
+            current.blocks[3][0]-=2*p;
+            current.blocks[3][1]-=2*p;
+            current.state=1;
+            }
+        
+    }
+    if(current.colour=="aqua") {
+        if(current.state == 1) {
+            current.blocks[0][1]-=2*p;
+            current.state=2;
+        }
+        else if(current.state == 2) {
+            current.blocks[3][0]-=p;
+            current.blocks[3][1]+=p;
+            current.state=3;
+            }
+        else if(current.state == 3) {
+            current.blocks[2][0]+=2*p;
+            current.state=4;
+            }
+        else if(current.state == 4) {
+            current.blocks[0][1]+=2*p;
+            current.blocks[3][0]+=p;
+            current.blocks[3][1]-=p;
+            current.blocks[2][0]-=2*p;
+            current.state=1;
+            }
+        
+    }
+
+    if(current.colour=="aquamarine") {
+        if(current.state == 1) {
+            current.blocks[2][1]-=p; 
+            current.blocks[3][0]-=2*p;
+            current.blocks[3][1]-=p;
+            current.state=2;
+        }
+        else if(current.state == 2) {
+            current.blocks[2][1]+=p; 
+            current.blocks[3][0]+=2*p;
+            current.blocks[3][1]+=p;
+            current.state=1;
+            }
+        
+    }
+    if(current.colour=="greenyellow") {
+        if(current.state == 1) {
+            current.blocks[2][1]-=2*p; 
+            current.blocks[3][0]+=2*p;
+            current.state=2;
+        }
+        else if(current.state == 2) {
+            current.blocks[2][1]+=2*p; 
+            current.blocks[3][0]-=2*p;
+            current.state=1;
+            }
+        
+    }
+    if(current.colour=="pink") {
+        if(current.state == 1) {
+            current.blocks[3][1]-=2*p;
+            current.blocks[3][0]-=2*p;
+            current.state=2;
+        }
+        else if(current.state == 2) {
+            current.blocks[3][1]+=p;
+            current.blocks[3][0]+=2*p;
+            current.blocks[2][1]+=p;
+            current.blocks[2][0]+=2*p;
+            current.state=3;
+            }
+        else if(current.state == 3) {
+            current.blocks[3][1]+=p;
+            current.blocks[3][0]-=3*p;
+            current.blocks[2][1]+=p;
+            current.blocks[2][0]-=3*p;
+            current.state=4;
+            }
+        else if(current.state == 4) {
+            current.blocks[3][0]+=3*p;
+            current.blocks[2][0]+=p;
+            current.blocks[2][1]-=2*p;
+            current.state=1;
+            }
+        
+    }
+    if(current.colour=="orange") {
+        if(current.state == 1) {
+            current.blocks[3][0]+=2*p;
+            current.blocks[2][1]+=2*p;
+            current.blocks[2][0]+=2*p;
+            current.state=2;
+        }
+        else if(current.state == 2) {
+            current.blocks[2][1]-=2*p;
+            current.blocks[2][0]-=2*p;
+            current.blocks[3][1]-=2*p;
+            current.state=3;
+            }
+        else if(current.state == 3) {
+            current.blocks[2][1]+=p;
+            current.blocks[2][0]-=2*p;
+            current.blocks[3][1]+=p;
+            current.blocks[3][0]-=2*p;
+            current.state=4;
+            }
+        else if(current.state == 4) {
+            current.blocks[3][1]+=p;
+            current.blocks[2][1]-=p;
+            current.blocks[2][0]+=2*p;
+            current.state=1;
+            }
+        
+    }
+    
 }
