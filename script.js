@@ -6,6 +6,7 @@ var y = 0.5;
 var floor = 0.5 + 30 * p; //600.5, 380.5, 0.5 = coordinates of board
 canvas.height = 0.5 + 31 * p;
 canvas.width = 0.5 + 20 * p;
+var score = document.getElementById("score");
 
 //tetrominos
 var line = { state: 1, colour: "red", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x, y - 3 * p]] };
@@ -16,8 +17,8 @@ var z = { state: 1, colour: "greenyellow", blocks: [[x, y], [x, y - p], [x + p, 
 var l = { state: 1, colour: "pink", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x + p, y]] };
 var j = { state: 1, colour: "orange", blocks: [[x, y], [x, y - p], [x, y - 2 * p], [x - p, y]] };
 
-var tetroState = 1;
 var tetrominos = [line, square, t, s, z, l, j];
+// var tetrominos = [l, j];
 var current = JSON.parse(JSON.stringify(tetrominos[Math.floor(Math.random() * tetrominos.length)]));
 
 var past = [];
@@ -27,12 +28,14 @@ setInterval(refresh, 1000);
 
 function refresh() {
 
-    checkCollision();
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawboard();
     drawCurrent();
-    drawPast();
+    checkCollision();
     checkLine();
+    drawPast();
+    
 
 }
 
@@ -106,16 +109,53 @@ function storetetromino(tetromino) {
 }
 
 function checkLine() {
-    // for (let a = 0.5, b = 600.5; b > 0; b - p) {
-        past.forEach(function (tetromino) {
-            console.log(tetromino.blocks);
-            if (tetromino.blocks[2].includes([ 0.5, 600.5 ])) {
-                console.log("test");
+    // past.forEach(function(tetromino) {console.log(tetromino.blocks)});
+
+    for (let yline = 600.5; yline > 0; yline -= p) {
+        let count = 0;
+        for (let xline = 0.5; xline <= 380.5; xline += p) {
+
+
+            for (let i = 0; i < past.length; i++) {
+                for (let j = 0; j < past[i].blocks.length; j++) {
+                    if (past[i].blocks[j][1] == yline && past[i].blocks[j][0] == xline) {
+                        // xline +=p;
+                        count++;
+                        if (count == 20) destroyLine(yline);
+                        break;
+
+                    }
+                }
+
             }
+        }
+    }
+}
 
-        });
-    // }
-
+function destroyLine(yline) {
+    score.innerHTML = parseInt(score.innerHTML) + 100;
+    let xarray = [];
+    for (let i = 0; i < past.length; i++) {
+        for (let j = 0; j < past[i].blocks.length; j++) {
+            
+            if (past[i].blocks[j][1] == yline) {
+                xarray.push(past[i].blocks[j][0]);
+                past[i].blocks.splice(j, 1);
+                // for (let k = 0; k < past.length; k++) {
+                //     for (let m = 0; m < past[k].blocks.length; m++) {
+                //         if(past[k].blocks[m][0] == xcoord ) past[k].blocks[m][1]+=p;
+                //     }
+                // }
+                
+                j--;
+            }
+        }
+    }
+    for (let k = 0; k < past.length; k++) {
+        for (let m = 0; m < past[k].blocks.length; m++) {
+            if( xarray.includes(past[k].blocks[m][0]) ) past[k].blocks[m][1]+=p;
+        }
+    }
 }
 
 function checkCollision() {
@@ -132,7 +172,6 @@ function checkCollision() {
     }
     for (let i = 0; i < current.blocks.length; i++) {
         if (current.blocks[i][1] == floor) {
-            console.log(current.blocks);
             storetetromino(current);
         }
     }
